@@ -48,10 +48,8 @@ def check_word():
     return list_char_word
 
 
-
-
+'''Wyduki funkkcji +mechanika'''
 find_word = input(random_words_eng[0] + ' = ' +'-'*len(words_pol[index_random_words_eng])) # poszukiwane slowo
-print(check_len_word()) #wydruk słowa wpisanego po zmianie długowści
 print("".join(check_word())) #wydruk słowa wpisanego po sprawdzeniu dligosci i podmienieniu niewłaściwych lister
-print(random_words_eng[0] + ' = '+ find_word) #wydruk poszukiwanego slowa
+print('Podano : '+ find_word) #wydruk poszukiwanego slowa
 print(random_words_eng[0] + ' = ' + words_pol[index_random_words_eng]) #słówko ang i znaczenie polskie
