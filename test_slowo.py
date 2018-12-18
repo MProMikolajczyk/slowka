@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+#-*- coding: utf-8 -*-
 
 import unittest
+import unittest.mock
 import slowo
 
 slowo.words_eng = ['red','blue','green']
@@ -24,21 +27,24 @@ class Testslowo(unittest.TestCase):
                          len(['bb------', '---------', '-------'][0]))
 
     def test_select_lang_version(self):
-        self.assertEqual(slowo.select_lang_version(slowo.words_pol,1),[slowo.words_eng[1]])
-        self.assertEqual(slowo.select_lang_version(slowo.words_eng,1),[slowo.words_pol[1]])
+        self.assertEqual(slowo.select_lang_version(slowo.words_pol,1),slowo.words_eng[1])
+        self.assertEqual(slowo.select_lang_version(slowo.words_eng,1),slowo.words_pol[1])
 
     def test_loop_looking_word(self):
         self.assertEqual(slowo.loop_looking_word(slowo.words_eng,1),None) #spr tylko początek funkcji
 
     def test_loop_next_word(self):
+        #self.assertEqual(slowo.loop_next_word(slowo.words_eng), None)
         pass
 
     def test_loop_quit_program(self):
-        self.assertIs(slowo.loop_quit_program(slowo.words_eng,'y'),None) #spr czy przy 'y' jest ok
+        self.assertIs(slowo.loop_quit_program(slowo.words_eng,'y'),None)
 
     def test_choice_language_version(self):
-        self.assertTrue(slowo.choice_language_version('pol'), slowo.words_pol)
-
+        with unittest.mock.patch('builtins.input', return_value="pol"):
+            self.assertEqual(slowo.choice_language_version(), slowo.words_pol)
+        with unittest.mock.patch('builtins.input', return_value="ang"):
+            self.assertEqual(slowo.choice_language_version(), slowo.words_eng)
 
 if __name__ == '__main__':
     unittest.main()

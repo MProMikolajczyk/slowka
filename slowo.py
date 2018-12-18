@@ -45,31 +45,24 @@ def check_word(lang_list_words,find_word,index_random_words):
             list_char_word.append('-')
     return list_char_word
 
-'''Wybór opcji językowej'''
+'''Wybór opcji językowej, okreslenie zbioru poszukiwanego'''
 def select_lang_version(lang_version_list,index_random_words):
     if lang_version_list == words_pol: #spr warunku jezykowego (odpoweidz po polsku)
-        random_words_eng = list()  # lista slowek  angielskich wybranych losowo
-        random_words_eng.append(words_eng[index_random_words])  # dodanie do zbioru losowego angielskiego slowka
-        question_lang_word = random_words_eng
-        return question_lang_word
+        return words_eng[index_random_words]
     elif lang_version_list == words_eng: #spr warunku jezykowego (odpoweidz po angielsku)
-        random_words_pol = list()  # lista slowek poslich wybranych losowo
-        random_words_pol.append(words_pol[index_random_words])  # dodanie do zbioru losowego posliego slowka
-        question_lang_word = random_words_pol
-        return question_lang_word
+        return words_pol[index_random_words]
 
 ''' Pęta az to wpisania pożądanego słowa'''
 def loop_looking_word(lang_version_list,index_random_words,find_word = ''):
-    select_lang_version(lang_version_list,index_random_words)
     while find_word != lang_version_list[index_random_words]:
-        find_word = input(select_lang_version(lang_version_list,index_random_words)[0] + ' = '
+        find_word = input(select_lang_version(lang_version_list,index_random_words) + ' = '
                           + str(check_word(lang_version_list,find_word,index_random_words))) #szukane (wpisywane) slowo
         print('Podano : ' + find_word)  # wydruk poszukiwanego slowaP
         if find_word == lang_version_list[index_random_words]:
             print('dobrze\n')
             break
         elif find_word == 'n': #po wpisanu n pokazuje slowo szukane
-            print(select_lang_version(lang_version_list,index_random_words)[0] + ' = '
+            print(select_lang_version(lang_version_list,index_random_words) + ' = '
                   + lang_version_list[index_random_words]+'\n')  # słówko ang i znaczenie polskie
             break
 
@@ -110,4 +103,4 @@ def choice_language_version(lang_version_list=''):
             return words_eng
 
 
-loop_quit_program(choice_language_version())
+#loop_quit_program(choice_language_version())
