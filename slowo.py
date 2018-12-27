@@ -9,7 +9,7 @@ Dane przechowyne są w bazie danych MySQL'''
 import random
 import data
 
-dictionary_words = data.bd.show_words_in_dict()
+dictionary_words = data.bd.show_words_in_dict('slowka','pol','ang')
 
 words_eng = [word for word in dictionary_words]
 words_pol = [dictionary_words[keys] for keys in dictionary_words]

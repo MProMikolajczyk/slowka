@@ -77,7 +77,7 @@ class Testdata(unittest.TestCase):
 
 
     def test_show_words_in_dict(self):
-        self.assertEqual(data.bd.show_words_in_dict()['bed'],'łóżko')
+        self.assertEqual(data.bd.show_words_in_dict('slowka','pol','ang')['bed'],'łóżko')
 
 
 
