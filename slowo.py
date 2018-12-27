@@ -7,10 +7,9 @@ Dane przechowyne są w bazie danych MySQL'''
 #-*- coding: utf-8 -*-
 
 import random
+import data
 
-dictionary_words = {'bed' : 'łóżko',
-                    'chair' : 'krzesło',
-                    'desk' : 'biurko'}
+dictionary_words = data.bd.show_words_in_dict()
 
 words_eng = [word for word in dictionary_words]
 words_pol = [dictionary_words[keys] for keys in dictionary_words]

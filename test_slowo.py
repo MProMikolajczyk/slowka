@@ -4,11 +4,15 @@
 import unittest
 import unittest.mock
 import slowo
+import data
 
-slowo.words_eng = ['red','blue','green']
-slowo.words_pol = ['czerwony','niebieski','zielony']
+
 
 class Testslowo(unittest.TestCase):
+
+    slowo.words_eng = ['red', 'blue', 'green']
+    slowo.words_pol = ['czerwony', 'niebieski', 'zielony']
+
     def test_list_letter(self):
         self.assertEqual(list(slowo.list_letter('big')),['b','i','g'])
         self.assertEqual(list(slowo.list_letter('data')), ['d', 'a', 't','a'])
@@ -45,6 +49,37 @@ class Testslowo(unittest.TestCase):
             self.assertEqual(slowo.choice_language_version(), slowo.words_pol)
         with unittest.mock.patch('builtins.input', return_value="ang"):
             self.assertEqual(slowo.choice_language_version(), slowo.words_eng)
+
+class Testdata(unittest.TestCase):
+
+    def test_create_data(self):
+        data_base_list=list()
+        data.bd.mycursor.execute('SHOW DATABASES;')
+        for bd in data.bd.mycursor:
+            data_base_list.append(bd)
+        self.assertIn(('slowka',),data_base_list)
+
+    def test_create_table(self):
+        data_table_list=list()
+        data.bd.mycursor.execute('SHOW TABLES;')
+        for tables in data.bd.mycursor:
+            data_table_list.append(tables)
+        self.assertIn(('slowka',),data_table_list)
+
+
+    def test_insert_into_table(self):
+        data_words_list = list()
+        data.bd.mycursor.execute('SELECT * FROM slowka')
+        for words in data.bd.mycursor:
+            data_words_list.append(words)
+        self.assertIn('łóżko',data_words_list[0])
+        self.assertIn('bed', data_words_list[0])
+
+
+    def test_show_words_in_dict(self):
+        self.assertEqual(data.bd.show_words_in_dict()['bed'],'łóżko')
+
+
 
 if __name__ == '__main__':
     unittest.main()

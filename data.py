@@ -2,11 +2,6 @@
 #-*- coding: utf-8 -*-
 
 
-
-dictionary_words = {'bed' : 'łóżko',
-                    'chair' : 'krzesło',
-                    'desk' : 'biurko'} #to ma być na wyjściu
-
 import mysql.connector
 
 class Database(object):
@@ -19,8 +14,7 @@ class Database(object):
             port = '3307',
             passwd ='',
             collation = 'utf8_unicode_ci')
-        self.mycursor = self.mydb.cursor()
-
+        self.mycursor = self.mydb.cursor() #definiowanie dodawania zapytań
 
     '''utorzenie bazydanych slowka'''
     def create_data(self):
@@ -37,20 +31,43 @@ class Database(object):
                               "PRIMARY KEY({id}));".format(name_table=name_table,
                                                            id = identity,
                                                            name_column_1 = name_column_attribute_1,
-                                                           name_column_2 = name_column_attribute_2))
+                                                           name_column_2 = name_column_attribute_2
+                                                           ))
         self.mydb.commit()
 
     '''dodawanie do tabeli slowek '''
-    def insert_into_table(self):
-        pass
+    def insert_into_table(self, name_table, word_pol, word_ang):
+        self.mycursor.execute("INSERT INTO {name_table} (pol,ang) VALUES ('{word_pol}','{word_ang}');".format(name_table = name_table,
+                                                                                            word_pol = word_pol,
+                                                                                            word_ang = word_ang
+                                                                                            ))
+        self.mydb.commit()
+
+    '''odczyt wszystkich slowek z tabeli w postaci słownika'''
+    def show_words_in_dict(self):
+        dict_words = dict()
+        self.mycursor.execute("SELECT ang, pol FROM slowka;")
+        myresult_words = self.mycursor.fetchall()
+        self.mydb.commit()
+        for key,values in myresult_words:
+            dict_words.update({key:values})
+        return dict_words
 
 
 
 bd=Database()
 bd.create_data()
-bd.create_table('slowka','id','pol VARCHAR(255) NOT NULL,','ang VARCHAR(255) NOT NULL,')
+bd.create_table('slowka','id','pol VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,','ang VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,')
+#bd.insert_into_table('slowka','niebieski','blue') #dodawanie słówek do tabeli
+bd.show_words_in_dict() #wyjściowe słownik do slówek
 
 
+
+
+
+
+
+'''pomoc naukowa'''
 #mycursor.executemany() dodaje całe listy danych
 
 #for db in mycursor: #drukowanie wszystkich baz danych
