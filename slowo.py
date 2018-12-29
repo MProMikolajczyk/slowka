@@ -9,7 +9,7 @@ Dane przechowyne są w bazie danych MySQL'''
 import random
 import data
 
-dictionary_words = data.bd.show_words_in_dict('slowka','pol','ang')
+dictionary_words = data.bd_main.show_words_in_dict('slowka','pol','ang')
 
 words_eng = [word for word in dictionary_words]
 words_pol = [dictionary_words[keys] for keys in dictionary_words]
@@ -65,7 +65,7 @@ def loop_looking_word(lang_version_list,index_random_words,find_word = ''):
                   + lang_version_list[index_random_words]+'\n')  # słówko ang i znaczenie polskie
             break
 
-'''Peta kolejnych słów wpisywanych + usówanie ze zbioru uzytego slowa'''
+'''Peta kolejnych słów wpisywanydata.bd_main.show_words_in_dict('slowka','pol','ang')ch + usówanie ze zbioru uzytego slowa'''
 def loop_next_word(lang_version_list):
     while len(lang_version_list) > 0:
         index_random_words = random.randint(0, len(lang_version_list) - 1)  # losowanie indexu w zdiorze słóów
@@ -102,4 +102,4 @@ def choice_language_version(lang_version_list=''):
             return words_eng
 
 
-#loop_quit_program(choice_language_version())
+#loop_quit_program(choice_language_version()) #do wstawienia do kocowego modułu

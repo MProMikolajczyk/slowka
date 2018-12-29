@@ -66,7 +66,6 @@ class Testdata(unittest.TestCase):
             data_table_list.append(tables)
         self.assertIn(('slowka',),data_table_list)
 
-
     def test_insert_into_table(self):
         data_words_list = list()
         data.bd.mycursor.execute('SELECT * FROM slowka')
@@ -75,9 +74,23 @@ class Testdata(unittest.TestCase):
         self.assertIn('łóżko',data_words_list[0])
         self.assertIn('bed', data_words_list[0])
 
+    def test_update_databases(self):
+        data_words_list = list()
+        data.bd.mycursor.execute('SELECT * FROM slowka')
+        for words in data.bd.mycursor:
+            data_words_list.append(words)
+        self.assertIn('drzwi', data_words_list[3])
+        self.assertIn('door', data_words_list[3])
+
+    def test_show_all_values(self):
+        self.assertIsNot(data.bd.show_all_values('slowka'),False)
 
     def test_show_words_in_dict(self):
-        self.assertEqual(data.bd.show_words_in_dict('slowka','pol','ang')['bed'],'łóżko')
+        self.assertEqual(data.bd_main.show_words_in_dict('slowka','pol','ang')['bed'],'łóżko')
+
+    def test_database_like(self):
+        self.assertEqual(data.bd_letter.database_like('slowka', 'pol', 'ang', 'pol','k')['krzesło'],'chair')
+
 
 
 

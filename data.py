@@ -3,8 +3,8 @@
 
 
 import mysql.connector
-
-class Database(object):
+'''kwerendy do obsługi baz danych'''
+class Database:
 
 
     def __init__(self):
@@ -13,7 +13,8 @@ class Database(object):
             user = 'root',
             port = '3307',
             passwd ='',
-            collation = 'utf8_unicode_ci')
+            collation = 'utf8_unicode_ci',
+            database = 'slowka')
         self.mycursor = self.mydb.cursor() #definiowanie dodawania zapytań
 
     '''utorzenie bazydanych slowka'''
@@ -38,16 +39,39 @@ class Database(object):
     '''dodawanie do tabeli slowek '''
     def insert_into_table(self, name_table, word_pol, word_ang):
         self.mycursor.execute("INSERT INTO {name_table} (pol,ang) VALUES ("
-                              "'{word_pol}','{word_ang}');".format(name_table = name_table,
+                              "'{word_pol}','{word_ang}');".format(
+                                                                name_table = name_table,
                                                                 word_pol = word_pol,
                                                                 word_ang = word_ang
                                                                 ))
         self.mydb.commit()
 
-    '''odczyt wszystkich slowek z tabeli w postaci słownika'''
+    '''poprawianie wartości w bd'''
+    def update_databases(self,name_table,pol,value_pol,ang,value_ang,index_value):
+        self.mycursor.execute("UPDATE {name_table} SET {column_name_pol} = '{value_name_pol}',"
+                              " {column_name_ang} = '{value_name_ang}' where id = {index_value}".format(
+                                                                name_table = name_table,
+                                                                column_name_pol = pol,
+                                                                value_name_pol = value_pol,
+                                                                column_name_ang = ang,
+                                                                value_name_ang = value_ang,
+                                                                index_value = index_value
+                                                                ))
+        self.mydb.commit()
+
+    '''drukowanie wszystkich wartosci wraz z id słówek'''
+    def show_all_values(self,name_table):
+        self.mycursor.execute("SELECT * FROM {name_table}".format(name_table = name_table))
+        myresult = self.mycursor.fetchall()
+        for words in myresult:
+            print(words)
+
+'''odczyt wszystkich slowek z tabeli w postaci słownika'''
+class Data1(Database):
     def show_words_in_dict(self,name_table,pol,ang):
         dict_words = dict()
-        self.mycursor.execute("SELECT {version_lang_ang}, {version_lang_pol} FROM {name_table};".format(name_table = name_table,
+        self.mycursor.execute("SELECT {version_lang_ang}, {version_lang_pol} FROM {name_table};".format(
+                                                                    name_table = name_table,
                                                                     version_lang_pol = pol,
                                                                     version_lang_ang = ang
                                                                     ))
@@ -57,23 +81,48 @@ class Database(object):
             dict_words.update({key:values})
         return dict_words
 
-    '''poprawianie wartości w bd'''
+'''utorzenie zbioru zaczynajacego sie na litere '''
+class Data2(Database):
+
+    def database_like(self,name_table, pol, ang, sort_pol, letter):
+        dict_words = dict()
+        self.mycursor.execute("SELECT {version_lang_pol}, {version_lang_ang} "
+                              "FROM {name_table} WHERE {sort_word} LIKE '{sort_letter}%'".format(
+                                                                    name_table = name_table,
+                                                                    version_lang_pol = pol,
+                                                                    version_lang_ang = ang,
+                                                                    sort_word = sort_pol,
+                                                                    sort_letter = letter
+                                                                    ))
+        myresult_words = self.mycursor.fetchall()
+        self.mydb.commit()
+        for key, values in myresult_words:
+            dict_words.update({key: values})
+        return dict_words
 
 
 
 bd=Database()
-bd.create_data()
-bd.create_table('slowka','id','pol VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,','ang VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,')
+bd_main = Data1()
+bd_letter = Data2()
+
+'''funkcje z komedami do wstawienia do modułu końcowego'''
+bd.create_data() # utorzenie i połączenie się z baza danych 'slowka'
+bd.create_table('slowka','id','pol VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,','ang VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,') #utorzenie dowolnej tabelki
 #bd.insert_into_table('slowka','niebieski','blue') #dodawanie słówek do tabeli
-bd.show_words_in_dict('slowka','pol','ang') #wyjściowe słownik do slówek
+
+#bd.update_databases('slowka','pol','drzwi','ang','door',5) # nadpisywanie wartosci w razie pomyłki
+#bd.show_all_values('slowka') #wydruk wszytskich slowek z bazy danych
+
+bd_main.show_words_in_dict('slowka','pol','ang') #wyjściowe słownik do slówek
+bd_letter.database_like('slowka', 'pol', 'ang', 'pol','k')
 
 
 
 
 
 
-
-'''pomoc naukowa'''
+'''pomoc naukowa do baz danych w mysql - python'''
 #mycursor.executemany() dodaje całe listy danych
 
 #for db in mycursor: #drukowanie wszystkich baz danych
