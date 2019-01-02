@@ -5,6 +5,7 @@ import unittest
 import unittest.mock
 import slowo
 import data
+import translator
 
 
 
@@ -91,8 +92,18 @@ class Testdata(unittest.TestCase):
     def test_database_like(self):
         self.assertEqual(data.bd_letter.database_like('slowka', 'pol', 'ang', 'pol','k')['krzesło'],'chair')
 
+class Testtranslator(unittest.TestCase):
 
+    test_translate_eng = translator.ENG('red')
+    test_translate_pol = translator.POL('róża')
 
+    def test_translate_words_input(self):
+        self.assertEqual(self.test_translate_eng.translate_words_input(),'red')
+        self.assertEqual(self.test_translate_pol.translate_words_input(), 'róża')
+
+    def test_translate_words_output(self):
+        self.assertEqual(self.test_translate_eng.translate_words_output(),'czerwony')
+        self.assertEqual(self.test_translate_pol.translate_words_output(), 'rose')
 
 if __name__ == '__main__':
     unittest.main()
