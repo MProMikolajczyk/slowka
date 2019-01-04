@@ -59,12 +59,21 @@ class Database:
                                                                 ))
         self.mydb.commit()
 
-    '''drukowanie wszystkich wartosci wraz z id słówek'''
+    '''drukowanie wszystkich wartosci wraz z id tabeli'''
     def show_all_values(self,name_table):
         self.mycursor.execute("SELECT * FROM {name_table}".format(name_table = name_table))
         myresult = self.mycursor.fetchall()
         for words in myresult:
             print(words)
+
+    def show_tables(self):
+        list_table=list()
+        self.mycursor.execute("SHOW TABLES;")
+        myresult = self.mycursor.fetchall()
+        for table in myresult:
+            list_table.append(''.join(table))
+        return list_table
+
 
 '''odczyt wszystkich slowek z tabeli w postaci słownika'''
 class Data1(Database):
@@ -107,8 +116,7 @@ bd_main = Data1()
 bd_letter = Data2()
 
 '''funkcje z komedami do wstawienia do modułu końcowego'''
-bd.create_data() # utorzenie i połączenie się z baza danych 'slowka'
-bd.create_table('slowka','id','pol VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,','ang VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,') #utorzenie dowolnej tabelki
+
 #bd.insert_into_table('slowka','niebieski','blue') #dodawanie słówek do tabeli
 
 #bd.update_databases('slowka','pol','drzwi','ang','door',5) # nadpisywanie wartosci w razie pomyłki

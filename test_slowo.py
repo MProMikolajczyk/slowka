@@ -92,6 +92,9 @@ class Testdata(unittest.TestCase):
     def test_database_like(self):
         self.assertEqual(data.bd_letter.database_like('slowka', 'pol', 'ang', 'pol','k')['krzesło'],'chair')
 
+    def test_show_tables(self):
+        self.assertTrue(data.bd.show_tables())
+
 class Testtranslator(unittest.TestCase):
 
     test_translate_eng = translator.ENG('red')
