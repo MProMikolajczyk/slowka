@@ -123,20 +123,10 @@ bd_letter = Data2()
 #bd.show_all_values('slowka') #wydruk wszytskich slowek z bazy danych
 
 bd_main.show_words_in_dict('slowka','pol','ang') #wyjściowe słownik do slówek
-bd_letter.database_like('slowka', 'pol', 'ang', 'pol','k')
+bd_letter.database_like('slowka', 'pol', 'ang', 'pol','k') # słownik dla słówek wybieranych na litere
 
 
 
 
 
 
-'''pomoc naukowa do baz danych w mysql - python'''
-#mycursor.executemany() dodaje całe listy danych
-
-#for db in mycursor: #drukowanie wszystkich baz danych
-    #print(db)
-
-#myresult = mycursor.fetchall() # używane do otrzywyania wyrukóœ wyników zapytań
-#myresult = mycursor.fetchone()# otrzymuje tylko jeden wynik zapytania
-
-#mydb.commit() # bez tej komendy zapytania nie znają się w bazie danych
