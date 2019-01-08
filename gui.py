@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
 import data
+import translator
 
 
 '''Wybór tabeli z bazy naych po wprowadzniu'''
@@ -13,6 +14,10 @@ class WinUser(QtWidgets.QWidget):
 
         # Tytuł okienka
         self.setWindowTitle('Translator_program')
+
+        #shortcut quit
+        self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self)
+        self.shortcut_quit.activated.connect(self.b_quit)
 
     '''zawartośc okienka '''
     def properties(self):
@@ -80,9 +85,6 @@ class WinUser(QtWidgets.QWidget):
         self.shortcut_connect = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Return), self)
         self.shortcut_connect.activated.connect(self.b_connect)
 
-        self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Q"),self)
-        self.shortcut_quit.activated.connect(self.b_quit)
-
         self.show()
 
     '''pozycjonowanie okienka '''
@@ -133,6 +135,10 @@ class WinUser(QtWidgets.QWidget):
             self.main = WinMain()
             self.main.show()
 
+    #wartość aktywnego zbioru - nazwa zbioru / użytkownika
+    def activ_set(self):
+        return self.lable_base_text.text().lower()
+
 class WinMain(WinUser):
     '''okno nr 2 tłumacz'''
     def properties(self):
@@ -153,12 +159,14 @@ class WinMain(WinUser):
         self.lable_text_to_translate_pol.setAlignment(QtCore.Qt.AlignCenter)
 
         self.lable_text_to_translate_eng = QtWidgets.QLineEdit()
-        self.lable_text_to_translate_eng = QtWidgets.QLineEdit()
+        self.lable_text_to_translate_eng.setAlignment(QtCore.Qt.AlignCenter)
 
 
-        # lable text
+        # text attribute
         text_bold = QtGui.QFont()
         text_bold.setBold(True)
+
+        # lable text
         self.visible_text_translate_pol = QtWidgets.QLabel('Przetłumacz na język Polski:')
         self.visible_text_translate_pol.setAlignment(QtCore.Qt.AlignCenter)
         self.visible_text_translate_pol.setFont(text_bold)
@@ -299,12 +307,157 @@ class WinMain(WinUser):
         '''okreslenie wartwy wyśiwtlanej'''
         self.setLayout((v_box))
 
+        '''łaczenie przycisków'''
+        self.btw_quit.clicked.connect(self.b_quit)
+        self.btw_translate_to_pol.clicked.connect(self.b_tran_to_pol)
+        self.btw_translate_to_eng.clicked.connect(self.b_tran_to_eng)
+        self.btw_check_all_words.clicked.connect(self.b_check_all_words)
+        self.btw_check_word_char.clicked.connect(self.b_check_word_char)
+        self.btw_update_word.clicked.connect(self.b_update_word)
+        self.btw_pint_all_words.clicked.connect(self.b_print_all_words)
+
+        '''errors'''
+        self.error_text = QtWidgets.QErrorMessage()
+
         self.show()
+
+
+    '''metody dla przycisków '''
+
+    # quit
+    def b_quit(self):
+        self.close()
+
+    #translate to pol
+    def b_tran_to_pol(self):
+        # oczyszczenie actywnego pola textowego u dołu ekrany w przypadku ponowego wyboru słówka
+        self.lable_text_action.clear()
+
+        # kolor textu po kliknieciu
+        self.lable_text_action_trans_pol.setStyleSheet("color: red;")
+
+        # gdy zbiór jest pusty to wyświetl error
+        if self.lable_text_to_translate_pol.text() == '':
+            self.error_text.showMessage('Zbiór nie może być pusty')
+
+        # gdy są duplikaty w zbiorze wyświetl w activ_text na dole komunikat
+        elif (translator.ENG(self.lable_text_to_translate_pol.text().upper()).translate_words_output(),
+              # POL słówko wprowadzone, # ENG słówko otrzymane
+              translator.ENG(self.lable_text_to_translate_pol.text().upper()).translate_words_input()) \
+             in data.bd.show_pol_ang_values(user.activ_set(), 'pol', 'ang'):  # aktywny zbiór słówek
+
+            # dodanie textu do pola text_activ, wyniku tłumaczenia
+            self.lable_text_action_trans_pol.setText(
+                translator.ENG(
+                    self.lable_text_to_translate_pol.text().upper()).translate_words_input() +  # POL słówko wprowadzone
+                str(' = ') +
+                translator.ENG(
+                    self.lable_text_to_translate_pol.text().upper()).translate_words_output())  # ENG słówko otrzymane
+
+            # wyświetlenie komunikatu na dole okienka
+            self.lable_text_action.setText('Już kiedyś sprawdzałaś/eś')
+
+        #gdy słówko ze zbioru pol jest takie samo jak w ang
+        elif translator.ENG(self.lable_text_to_translate_pol.text().upper()).translate_words_output() == \
+                translator.ENG(self.lable_text_to_translate_pol.text().upper()).translate_words_input():
+
+            #wyświetl error nie ma takiego słowa
+            self.error_text.showMessage('Nie ma takiego słowa')
+
+
+        # gdy nie ma duplikatów i zbiór nie jest pusty
+        else:
+
+            # dodanie textu do pola text_activ, wyniku tłumaczenia
+            self.lable_text_action_trans_pol.setText(
+                translator.ENG(
+                    self.lable_text_to_translate_pol.text().upper()).translate_words_input() +  # ENG słówko wprowadzone
+                str(' = ') +
+                translator.ENG(
+                    self.lable_text_to_translate_pol.text().upper()).translate_words_output())  # POL słówko otrzymane
+
+            # dodanie słówek do zbioru
+            data.bd.insert_into_table(user.activ_set(),
+                                      translator.ENG(
+                                          self.lable_text_to_translate_pol.text().upper()).translate_words_output(),  # POL słówko otrzymane
+                                      translator.ENG(
+                                          self.lable_text_to_translate_pol.text().upper()).translate_words_input()  # ENG słówko wprowadzone
+                                      )
+
+    #translate to eng
+    def b_tran_to_eng(self):
+        #oczyszczenie actywnego pola textowego u dołu ekrany w przypadku ponowego wyboru słówka
+        self.lable_text_action.clear()
+
+        # kolor textu po kliknieciu
+        self.lable_text_action_trans_eng.setStyleSheet("color: red;")
+
+        #gdy zbiór jest pusty to wyświetl error
+        if self.lable_text_to_translate_eng.text() == '':
+            self.error_text.showMessage('Zbiór nie może być pusty')
+
+        #gdy są duplikaty w zbiorze wyświetl w activ_text na dole komunikat
+        elif (translator.POL(self.lable_text_to_translate_eng.text().upper()).translate_words_input(),  # POL słówko wprowadzone, # ENG słówko otrzymane
+              translator.POL(self.lable_text_to_translate_eng.text().upper()).translate_words_output()) \
+                in data.bd.show_pol_ang_values(user.activ_set(),'pol','ang'): #aktywny zbiór słówek
+
+            # dodanie textu do pola text_activ, wyniku tłumaczenia
+            self.lable_text_action_trans_eng.setText(
+                translator.POL(
+                    self.lable_text_to_translate_eng.text().upper()).translate_words_input() +  # POL słówko wprowadzone
+                str(' = ') +
+                translator.POL(
+                    self.lable_text_to_translate_eng.text().upper()).translate_words_output())  # ENG słówko otrzymane
+
+            #wyświetlenie komunikatu na dole okienka
+            self.lable_text_action.setText('Już kiedyś sprawdzałaś/eś')
+
+        # gdy słówko ze zbioru pol jest takie samo jak w ang
+        elif translator.POL(self.lable_text_to_translate_pol.text().upper()).translate_words_output() == \
+                translator.POL(self.lable_text_to_translate_pol.text().upper()).translate_words_input():
+
+            # wyświetl error nie ma takiego słowa
+            self.error_text.showMessage('Nie ma takiego słowa')
+
+        # gdy nie ma duplikatów i zbiór nie jest pusty
+        else:
+
+            # dodanie textu do pola text_activ, wyniku tłumaczenia
+            self.lable_text_action_trans_eng.setText(
+                translator.POL(
+                    self.lable_text_to_translate_eng.text().upper()).translate_words_input() +  # POL słówko wprowadzone
+                str(' = ') +
+                translator.POL(
+                    self.lable_text_to_translate_eng.text().upper()).translate_words_output())  # ENG słówko otrzymane
+
+            # dodanie słówek do zbioru
+            data.bd.insert_into_table(user.activ_set(),
+                                      translator.POL(
+                                          self.lable_text_to_translate_eng.text().upper()).translate_words_input(),
+                                      translator.POL(
+                                          self.lable_text_to_translate_eng.text().upper()).translate_words_output())
+
+    #check all set
+    def b_check_all_words(self):
+        pass
+
+    #check char in words set
+    def b_check_word_char(self):
+        pass
+
+    #update mistake
+    def b_update_word(self):
+        pass
+
+    #print all words in set
+    def b_print_all_words(self):
+        pass
 
 
 if __name__ == '__main__':
     data.bd.create_data() # utorzenie i połączenie się z baza danych 'slowka'
-    data.bd.create_table('slowka','id','pol VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,','ang VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,') #utorzenie dowolnej tabelki
+    data.bd.create_table('slowka','id','pol VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,',
+                         'ang VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,') #utorzenie dowolnej tabelki
     app = QtWidgets.QApplication(sys.argv)
     user = WinUser()
     sys.exit(app.exec_())
