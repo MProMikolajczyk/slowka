@@ -66,6 +66,17 @@ class Database:
         for words in myresult:
             print(words)
 
+    '''drukowanie wartosci z tabeli pol i ang'''
+    def show_pol_ang_values(self, name_table,pol,ang):
+        self.mycursor.execute("SELECT {column_name_pol}, {column_name_ang} FROM {name_table}".format(name_table=name_table,
+                                                                         column_name_pol=pol,
+                                                                         column_name_ang=ang
+                                                                         ))
+        myresult = self.mycursor.fetchall()
+        for words in myresult:
+            return words
+
+    '''drukowanie wszytich tabel'''
     def show_tables(self):
         list_table=list()
         self.mycursor.execute("SHOW TABLES;")
@@ -121,7 +132,7 @@ bd_letter = Data2()
 
 #bd.update_databases('slowka','pol','drzwi','ang','door',5) # nadpisywanie wartosci w razie pomyłki
 #bd.show_all_values('slowka') #wydruk wszytskich slowek z bazy danych
-
+print(bd.show_pol_ang_values('slowka','pol','ang'))
 bd_main.show_words_in_dict('slowka','pol','ang') #wyjściowe słownik do slówek
 bd_letter.database_like('slowka', 'pol', 'ang', 'pol','k') # słownik dla słówek wybieranych na litere
 
