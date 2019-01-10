@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 #-*- coding: utf-8 -*-
 
+'''author: Marek Mikołajczyk
+Moduł tworzący baze. Łączenie sie i pobieranie danych.
+Moduł tworzy słowniki do modułu slowo'''
 
 import mysql.connector
 '''kwerendy do obsługi baz danych'''
@@ -129,9 +132,3 @@ class Data2(Database):
 bd=Database()
 bd_main = Data1()
 bd_letter = Data2()
-
-
-
-
-
-

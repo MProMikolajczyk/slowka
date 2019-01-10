@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+#-*- coding: utf-8 -*-
+
+'''author: Marek Mikołajczyk
+Moduł do wizualizacji graficznej - okienkowej
+pozostałych modułów '''
+
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
 import data
@@ -170,6 +177,9 @@ class WinMain(WinUser):
         self.lable_eng_word = QtWidgets.QLineEdit() #ANG"
         self.lable_eng_word.setAlignment(QtCore.Qt.AlignCenter)
 
+        self.lable_char = QtWidgets.QLineEdit() # literka do zbioru zaczynającego się na litere
+        self.lable_char.setAlignment((QtCore.Qt.AlignCenter))
+
         # text attribute
         text_bold = QtGui.QFont()
         text_bold.setBold(True)
@@ -213,6 +223,10 @@ class WinMain(WinUser):
         self.lable_text_action_trans_eng = QtWidgets.QLabel('Oznacza: ') #output translated text eng
         self.lable_text_action_trans_eng.setAlignment(QtCore.Qt.AlignCenter)
         self.lable_text_action_trans_eng.setFont(text_bold)
+
+        #checkbox
+        self.checkbox_pol = QtWidgets.QCheckBox('Pol')
+        self.checkbox_eng = QtWidgets.QCheckBox('Eng')
 
         '''horizoltal box z layoutu'''
         #text Tłumacz na język Polski
@@ -272,6 +286,20 @@ class WinMain(WinUser):
         h_box_lable_mistake.addWidget(self.lable_pol_word,3)
         h_box_lable_mistake.addWidget(self.lable_eng_word,3)
 
+        # text_edit literka
+        h_box_lable_char = QtWidgets.QHBoxLayout()
+        h_box_lable_char.addWidget(self.btw_check_word_char,9)
+        h_box_lable_char.addWidget(self.lable_char,1)
+
+        #checkbox
+        h_box_lable_checkbox =QtWidgets.QHBoxLayout()
+        h_box_lable_checkbox.addStretch()
+        h_box_lable_checkbox.addWidget(self.checkbox_pol)
+        h_box_lable_checkbox.addStretch()
+        h_box_lable_checkbox.addWidget(self.checkbox_eng)
+        h_box_lable_checkbox.addStretch()
+        h_box_lable_checkbox.setAlignment(QtCore.Qt.AlignCenter)
+
         '''vboxy'''
         v_box = QtWidgets.QVBoxLayout()
 
@@ -310,9 +338,14 @@ class WinMain(WinUser):
         v_box.addLayout(h_box_text_check_self)
         v_box.addStretch()
 
-        # button check_all_words and check_char
+        # button check_all_words
         v_box.addWidget(self.btw_check_all_words)
-        v_box.addWidget(self.btw_check_word_char)
+
+        # button check_char and edit_text_char
+        v_box.addLayout(h_box_lable_char)
+
+        #checkbox choice language version
+        v_box.addLayout(h_box_lable_checkbox)
 
         #text 'Operacje na zabiorze'
         v_box.addStretch()
@@ -357,11 +390,21 @@ class WinMain(WinUser):
 
         self.show()
 
+    #metoda do czyszczenia text_edit
     def clear(self):
         self.clear()
 
-    '''metody dla przycisków '''
+    """checkboxes"""
+    def chx_pol_eng(self):
+        # jeśli pol jest zaznaczony
+        if self.checkbox_pol.isChecked():
+            return 'pol'
 
+        # jeśli eng jest zaznaczony
+        elif self.checkbox_eng.isChecked():
+            return 'ang'
+
+    '''metody dla przycisków '''
     # quit
     def b_quit(self):
         self.close()
@@ -598,115 +641,139 @@ class WinMain(WinUser):
     #check char in words set
     def b_check_word_char(self):
 
-        '''skopolowany moduł slowo z dobranym zbiorem - zaczynjącym sie na litere'''
+        '''słownik do podpięcia modułu'''
+        dictionary_words = data.bd_letter.database_like(user.activ_set(),  # activ set
+                                                        'pol',  # column pol in select table
+                                                        'ang',  # column ang in select table
+                                                        self.chx_pol_eng(),  # checked conditions checkbox
+                                                        self.lable_char.text())  # set wherein choice char
 
-        import random
+        # jeśli dwa checkboxy są zaznaczone równocześnie
+        if self.checkbox_pol.isChecked() and self.checkbox_eng.isChecked():
+            self.error_text.showMessage('Wybierz jeden język, w którym chcesz słówka')
 
-        dictionary_words = data.bd_letter.database_like(user.activ_set(), 'pol', 'ang', 'pol','o') # słownik dla słówek wybieranych na litere
+        # jeśli żaden checkbox nie jest zaznaczony
+        elif not self.checkbox_pol.isChecked() and not self.checkbox_eng.isChecked():
+            self.error_text.showMessage('Wybierz jeden język, w którym chcesz słówka')
 
-        words_eng = [word for word in dictionary_words]
-        words_pol = [dictionary_words[keys] for keys in dictionary_words]
+        # jeśli nie wybrano literki
+        elif self.lable_char.text() == '':
+            self.error_text.showMessage('Wybierz literę, na którą chcesz słówka')
 
-        '''zaminienia slowo wpowadzone na liste znakow'''
+        #jeżeli nie ma slówek w zbiorze
+        elif not dictionary_words:
+            self.error_text.showMessage('Brak słówek na tą litere')
 
-        def list_letter(word):
-            for letter in range(len(word)):
-                yield word[letter]
+        # wszytkie pola zostały uzupenione
+        else:
 
-        '''#spr. dlugosc podannego slowa ze slowem ze zbioru. 
-        Wyrównuje ich dlugosc, wstawiaja lub usuwajac zanki ze slowa'''
+            '''skopolowany moduł slowo z dobranym zbiorem - zaczynjącym sie na litere'''
 
-        def check_len_word(list_words, find_word, index_random_words):
-            list_find_word = list(list_letter(find_word))
-            if len(list_words[index_random_words]) == len(list_find_word):
+            import random
+
+            words_eng = [word for word in dictionary_words]
+            words_pol = [dictionary_words[keys] for keys in dictionary_words]
+
+            '''zaminienia slowo wpowadzone na liste znakow'''
+
+            def list_letter(word):
+                for letter in range(len(word)):
+                    yield word[letter]
+
+            '''#spr. dlugosc podannego slowa ze slowem ze zbioru. 
+            Wyrównuje ich dlugosc, wstawiaja lub usuwajac zanki ze slowa'''
+
+            def check_len_word(list_words, find_word, index_random_words):
+                list_find_word = list(list_letter(find_word))
+                if len(list_words[index_random_words]) == len(list_find_word):
+                    return list_find_word
+                elif len(list_words[index_random_words]) > len(list_find_word):
+                    list_find_word += '-' * (len(list_words[index_random_words]) - len(list_find_word))
+                elif len(list_words[index_random_words]) < len(list_find_word):
+                    while len(list_find_word) > len(list_words[index_random_words]):
+                        list_find_word.pop(len(list_find_word) - 1)
                 return list_find_word
-            elif len(list_words[index_random_words]) > len(list_find_word):
-                list_find_word += '-' * (len(list_words[index_random_words]) - len(list_find_word))
-            elif len(list_words[index_random_words]) < len(list_find_word):
-                while len(list_find_word) > len(list_words[index_random_words]):
-                    list_find_word.pop(len(list_find_word) - 1)
-            return list_find_word
 
-        '''spr znaki w słowie uzytym i wpisamyn. 
-        Tworzy liste ze znakami poprawnymi. w
-        Źle wpisane znaki zamienia na '-' '''
+            '''spr znaki w słowie uzytym i wpisamyn. 
+            Tworzy liste ze znakami poprawnymi. w
+            Źle wpisane znaki zamienia na '-' '''
 
-        def check_word(lang_list_words, find_word, index_random_words):
-            list_char_word = list()
-            for i in range(len(lang_list_words[index_random_words])):
-                if lang_list_words[index_random_words][i] == \
-                        check_len_word(lang_list_words, find_word, index_random_words)[i]:
-                    list_char_word.append(check_len_word(lang_list_words, find_word, index_random_words)[i])
-                else:
-                    list_char_word.append('-')
-            return list_char_word
+            def check_word(lang_list_words, find_word, index_random_words):
+                list_char_word = list()
+                for i in range(len(lang_list_words[index_random_words])):
+                    if lang_list_words[index_random_words][i] == \
+                            check_len_word(lang_list_words, find_word, index_random_words)[i]:
+                        list_char_word.append(check_len_word(lang_list_words, find_word, index_random_words)[i])
+                    else:
+                        list_char_word.append('-')
+                return list_char_word
 
-        '''Wybór opcji językowej, okreslenie zbioru poszukiwanego'''
+            '''Wybór opcji językowej, okreslenie zbioru poszukiwanego'''
 
-        def select_lang_version(lang_version_list, index_random_words):
-            if lang_version_list == words_pol:  # spr warunku jezykowego (odpoweidz po polsku)
-                return words_eng[index_random_words]
-            elif lang_version_list == words_eng:  # spr warunku jezykowego (odpoweidz po angielsku)
-                return words_pol[index_random_words]
+            def select_lang_version(lang_version_list, index_random_words):
+                if lang_version_list == words_pol:  # spr warunku jezykowego (odpoweidz po polsku)
+                    return words_eng[index_random_words]
+                elif lang_version_list == words_eng:  # spr warunku jezykowego (odpoweidz po angielsku)
+                    return words_pol[index_random_words]
 
-        ''' Pęta az to wpisania pożądanego słowa'''
+            ''' Pęta az to wpisania pożądanego słowa'''
 
-        def loop_looking_word(lang_version_list, index_random_words, find_word=''):
-            while find_word != lang_version_list[index_random_words]:
-                find_word = input(select_lang_version(lang_version_list, index_random_words) + ' = '
-                                  + str(
-                    check_word(lang_version_list, find_word, index_random_words))).upper()  # szukane (wpisywane) slowo
-                print('Podano : ' + find_word)  # wydruk poszukiwanego slowaP
-                if find_word == lang_version_list[index_random_words]:
-                    print('dobrze\n')
-                    break
-                elif find_word == 'N':  # po wpisanu n pokazuje slowo szukane
-                    print(select_lang_version(lang_version_list, index_random_words) + ' = '
-                          + lang_version_list[index_random_words] + '\n')  # słówko ang i znaczenie polskie
-                    break
+            def loop_looking_word(lang_version_list, index_random_words, find_word=''):
+                while find_word != lang_version_list[index_random_words]:
+                    find_word = input(select_lang_version(lang_version_list, index_random_words) + ' = '
+                                      + str(
+                        check_word(lang_version_list, find_word, index_random_words))).upper()  # szukane (wpisywane) slowo
+                    print('Podano : ' + find_word)  # wydruk poszukiwanego slowaP
+                    if find_word == lang_version_list[index_random_words]:
+                        print('dobrze\n')
+                        break
+                    elif find_word == 'N':  # po wpisanu n pokazuje slowo szukane
+                        print(select_lang_version(lang_version_list, index_random_words) + ' = '
+                              + lang_version_list[index_random_words] + '\n')  # słówko ang i znaczenie polskie
+                        break
 
-        '''Peta kolejnych słów wpisywanydata.bd_main.show_words_in_dict('slowka','pol','ang')ch + usówanie ze zbioru uzytego slowa'''
+            '''Peta kolejnych słów wpisywanydata.bd_main.show_words_in_dict('slowka','pol','ang')ch + usówanie ze zbioru uzytego slowa'''
 
-        def loop_next_word(lang_version_list):
-            while len(lang_version_list) > 0:
-                index_random_words = random.randint(0, len(lang_version_list) - 1)  # losowanie indexu w zdiorze słóów
-                loop_looking_word(lang_version_list, index_random_words,
-                                  find_word='')  # opdowiedź po polsku, tytaj wybiera sie jezyk w jakim chce sie odpowiadać.
-                if lang_version_list == words_eng:
-                    lang_version_list.pop(index_random_words)
-                    words_pol.pop(index_random_words)
-                elif lang_version_list == words_pol:
-                    lang_version_list.pop(index_random_words)
-                    words_eng.pop(index_random_words)
+            def loop_next_word(lang_version_list):
+                while len(lang_version_list) > 0:
+                    index_random_words = random.randint(0, len(lang_version_list) - 1)  # losowanie indexu w zdiorze słóów
+                    loop_looking_word(lang_version_list, index_random_words,
+                                      find_word='')  # opdowiedź po polsku, tytaj wybiera sie jezyk w jakim chce sie odpowiadać.
+                    if lang_version_list == words_eng:
+                        lang_version_list.pop(index_random_words)
+                        words_pol.pop(index_random_words)
+                    elif lang_version_list == words_pol:
+                        lang_version_list.pop(index_random_words)
+                        words_eng.pop(index_random_words)
 
-        '''zakończenie programu, uruchomienie ponownie, 
-        pobranie nowego zbioru słów do programy, ponowny wybór wersji językowej '''
+            '''zakończenie programu, uruchomienie ponownie, 
+            pobranie nowego zbioru słów do programy, ponowny wybór wersji językowej '''
 
-        def loop_quit_program(lang_version_list, quit_program=''):
-            while quit_program != 'y':  # pętla do póki nie wybierzes się 'y' przy zakończeniu programu
-                loop_next_word(lang_version_list)  # tu nalezy określić wersję językową
-                quit_program = input('Czy zakończyć (y/n)')
-                if quit_program == 'n':  # określenie warunków przy wyborze 'n'. Wybór wersji językowej, uzupełnienie słów w zbiorze
-                    again_words_eng = [word for word in dictionary_words]  # ponownie imprementowany zbiór słów ang
-                    again_words_pol = [dictionary_words[keys] for keys in
-                                       dictionary_words]  # ponownie imprementowany zbiór słów pol
-                    for words in again_words_eng:
-                        words_eng.append(words)
-                    for words in again_words_pol:
-                        words_pol.append(words)
-                    loop_next_word(choice_language_version())  # ponowny wybór wersji językowej + wpisywanie slów
+            def loop_quit_program(lang_version_list, quit_program=''):
+                while quit_program != 'y':  # pętla do póki nie wybierzes się 'y' przy zakończeniu programu
+                    loop_next_word(lang_version_list)  # tu nalezy określić wersję językową
+                    quit_program = input('Czy zakończyć (y/n)')
+                    if quit_program == 'n':  # określenie warunków przy wyborze 'n'. Wybór wersji językowej, uzupełnienie słów w zbiorze
+                        again_words_eng = [word for word in dictionary_words]  # ponownie imprementowany zbiór słów ang
+                        again_words_pol = [dictionary_words[keys] for keys in
+                                           dictionary_words]  # ponownie imprementowany zbiór słów pol
+                        for words in again_words_eng:
+                            words_eng.append(words)
+                        for words in again_words_pol:
+                            words_pol.append(words)
+                        loop_next_word(choice_language_version())  # ponowny wybór wersji językowej + wpisywanie slów
 
-        '''Określenie przez użytkownika wersji językowej'''
+            '''Określenie przez użytkownika wersji językowej'''
 
-        def choice_language_version(lang_version_list=''):
-            while lang_version_list != 'pol' or lang_version_list != 'ang':
-                lang_version_list = input('Wybierz w jakim języku chcesz odpowiadać (pol/ang) ')
-                if lang_version_list == 'pol':
-                    return words_pol
-                elif lang_version_list == 'ang':
-                    return words_eng
+            def choice_language_version(lang_version_list=''):
+                while lang_version_list != 'pol' or lang_version_list != 'ang':
+                    lang_version_list = input('Wybierz w jakim języku chcesz odpowiadać (pol/ang) ')
+                    if lang_version_list == 'pol':
+                        return words_pol
+                    elif lang_version_list == 'ang':
+                        return words_eng
 
-        loop_quit_program(choice_language_version())
+            loop_quit_program(choice_language_version())
 
     #update mistake
     def b_update_word(self):

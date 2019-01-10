@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 #-*- coding: utf-8 -*-
 
+'''author: Marek Mikołajczyk
+Moduł Translator.
+Dostaje zwracane zapytanie
+ze strony https://translate.google.com. '''
+
 from googletrans import Translator
 
 

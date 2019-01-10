@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 #-*- coding: utf-8 -*-
 
+'''author: Marek Mikołajczyk
+Testy jednoskowe do modułu slowo, data i translator'''
+
 import unittest
 import unittest.mock
 import slowo
