@@ -9,7 +9,8 @@ Dane przechowyne są w bazie danych MySQL'''
 import random
 import data
 
-dictionary_words = data.bd_main.show_words_in_dict('slowka','pol','ang')
+
+dictionary_words = data.bd_main.show_words_in_dict('marek', 'pol', 'ang')
 
 words_eng = [word for word in dictionary_words]
 words_pol = [dictionary_words[keys] for keys in dictionary_words]
@@ -55,12 +56,12 @@ def select_lang_version(lang_version_list,index_random_words):
 def loop_looking_word(lang_version_list,index_random_words,find_word = ''):
     while find_word != lang_version_list[index_random_words]:
         find_word = input(select_lang_version(lang_version_list,index_random_words) + ' = '
-                          + str(check_word(lang_version_list,find_word,index_random_words))) #szukane (wpisywane) slowo
+                          + str(check_word(lang_version_list,find_word,index_random_words))).upper() #szukane (wpisywane) slowo
         print('Podano : ' + find_word)  # wydruk poszukiwanego slowaP
         if find_word == lang_version_list[index_random_words]:
             print('dobrze\n')
             break
-        elif find_word == 'n': #po wpisanu n pokazuje slowo szukane
+        elif find_word == 'N': #po wpisanu n pokazuje slowo szukane
             print(select_lang_version(lang_version_list,index_random_words) + ' = '
                   + lang_version_list[index_random_words]+'\n')  # słówko ang i znaczenie polskie
             break
@@ -102,4 +103,4 @@ def choice_language_version(lang_version_list=''):
             return words_eng
 
 
-#loop_quit_program(choice_language_version()) #do wstawienia do kocowego modułu
+#loop_quit_program(choice_language_version())
