@@ -61,10 +61,12 @@ class Database:
 
     '''drukowanie wszystkich wartosci wraz z id tabeli'''
     def show_all_values(self,name_table):
+        list_table = list()
         self.mycursor.execute("SELECT * FROM {name_table}".format(name_table = name_table))
         myresult = self.mycursor.fetchall()
         for words in myresult:
-            print(words)
+            list_table.append(str(words))
+        return list_table
 
     '''drukowanie wartosci z tabeli pol i ang'''
     def show_pol_ang_values(self, name_table,pol,ang):
@@ -127,17 +129,6 @@ class Data2(Database):
 bd=Database()
 bd_main = Data1()
 bd_letter = Data2()
-
-'''funkcje z komedami do wstawienia do modułu końcowego'''
-
-
-
-#bd.update_databases('slowka','pol','drzwi','ang','door',5) # nadpisywanie wartosci w razie pomyłki
-#bd.show_all_values('slowka') #wydruk wszytskich slowek z bazy danych
-
-
-bd_main.show_words_in_dict('slowka','pol','ang') #wyjściowe słownik do slówek
-bd_letter.database_like('slowka', 'pol', 'ang', 'pol','k') # słownik dla słówek wybieranych na litere
 
 
 
